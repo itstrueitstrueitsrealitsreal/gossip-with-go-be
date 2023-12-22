@@ -5,7 +5,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func Setup() chi.Router {
+func Setup() *chi.Mux {
 	r := chi.NewRouter()
 	setUpRoutes(r)
 	return r

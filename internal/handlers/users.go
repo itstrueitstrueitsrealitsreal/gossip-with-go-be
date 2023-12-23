@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/CVWO/sample-go-app/internal/dataaccess/users"
+	"github.com/go-chi/chi/v5"
 	"net/http"
 
 	"github.com/CVWO/sample-go-app/internal/api"
@@ -44,5 +45,34 @@ func HandleListUsers(w http.ResponseWriter, r *http.Request) (*api.Response, err
 			Data: data,
 		},
 		Messages: []string{SuccessfulListUsersMessage},
+	}, nil
+}
+
+// HandleGetUser retrieves a single user by ID
+func HandleGetUser(w http.ResponseWriter, r *http.Request) (*api.Response, error) {
+	userID := chi.URLParam(r, "id")
+	if userID == "" {
+		return nil, errors.New("User ID is missing")
+	}
+
+	db, err := database.GetDB()
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to retrieve database in HandleGetUser")
+	}
+
+	user, err := users.GetUserByID(db, userID)
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to retrieve user in HandleGetUser")
+	}
+
+	data, err := json.Marshal(user)
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to encode user in HandleGetUser")
+	}
+
+	return &api.Response{
+		Payload: api.Payload{
+			Data: data,
+		},
 	}, nil
 }

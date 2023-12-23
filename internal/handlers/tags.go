@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/CVWO/sample-go-app/internal/dataaccess/tags"
+	"github.com/go-chi/chi/v5"
 	"net/http"
 
 	"github.com/CVWO/sample-go-app/internal/api"
@@ -18,6 +19,7 @@ const (
 	ErrRetrieveTags           = "Failed to retrieve tags in %s"
 )
 
+// HandleListTags returns all tags in a json format
 func HandleListTags(w http.ResponseWriter, r *http.Request) (*api.Response, error) {
 	db, err := database.GetDB()
 
@@ -40,5 +42,34 @@ func HandleListTags(w http.ResponseWriter, r *http.Request) (*api.Response, erro
 			Data: data,
 		},
 		Messages: []string{SuccessfulListTagsMessage},
+	}, nil
+}
+
+// HandleGetTag retrieves a single tag by ID
+func HandleGetTag(w http.ResponseWriter, r *http.Request) (*api.Response, error) {
+	tagID := chi.URLParam(r, "id")
+	if tagID == "" {
+		return nil, errors.New("Tag ID is missing")
+	}
+
+	db, err := database.GetDB()
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to retrieve database in HandleGetTag")
+	}
+
+	tag, err := tags.GetTagByID(db, tagID)
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to retrieve tag in HandleGetTag")
+	}
+
+	data, err := json.Marshal(tag)
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to encode tag in HandleGetTag")
+	}
+
+	return &api.Response{
+		Payload: api.Payload{
+			Data: data,
+		},
 	}, nil
 }

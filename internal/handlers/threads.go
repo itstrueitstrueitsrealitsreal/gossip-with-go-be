@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/CVWO/sample-go-app/internal/dataaccess/threads"
+	"github.com/go-chi/chi/v5"
 
 	"github.com/CVWO/sample-go-app/internal/api"
 	"github.com/CVWO/sample-go-app/internal/database"
@@ -40,5 +41,34 @@ func HandleListThreads(w http.ResponseWriter, r *http.Request) (*api.Response, e
 			Data: data,
 		},
 		Messages: []string{SuccessfulListThreadsMessage},
+	}, nil
+}
+
+// HandleGetThread retrieves a single thread by ID
+func HandleGetThread(w http.ResponseWriter, r *http.Request) (*api.Response, error) {
+	threadID := chi.URLParam(r, "id")
+	if threadID == "" {
+		return nil, errors.New("Thread ID is missing")
+	}
+
+	db, err := database.GetDB()
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to retrieve database in HandleGetThread")
+	}
+
+	thread, err := threads.GetThreadByID(db, threadID)
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to retrieve thread in HandleGetThread")
+	}
+
+	data, err := json.Marshal(thread)
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to encode thread in HandleGetThread")
+	}
+
+	return &api.Response{
+		Payload: api.Payload{
+			Data: data,
+		},
 	}, nil
 }

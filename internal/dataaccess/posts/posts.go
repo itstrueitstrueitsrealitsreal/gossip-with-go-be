@@ -1,76 +1,83 @@
 package posts
 
 import (
+	"fmt"
 	"github.com/CVWO/sample-go-app/internal/database"
-	"github.com/CVWO/sample-go-app/internal/models"
 	"time"
 )
 
-func List(db *database.Database) ([]models.Post, error) {
-	posts := []models.Post{
-		{
-			ID:        1,
-			ThreadID:  1,
-			AuthorID:  1,
-			Content:   "Sample post content 1",
-			Timestamp: time.Now(),
-		},
-		{
-			ID:        2,
-			ThreadID:  1,
-			AuthorID:  2,
-			Content:   "Sample post content 2",
-			Timestamp: time.Now(),
-		},
+// PostJSON is a struct used for JSON marshaling with a custom timestamp format
+type PostJSON struct {
+	ID        int    `json:"id"`
+	ThreadID  int    `json:"thread"`
+	AuthorID  int    `json:"author"`
+	Content   string `json:"content"`
+	Timestamp string `json:"timestamp"`
+}
+
+// List retrieves a list of posts from the database.
+func List(db *database.Database) ([]PostJSON, error) {
+	// Query to select posts from the database
+	query := "SELECT id, thread_id, author_id, content, timestamp FROM posts"
+
+	// Execute the query
+	rows, err := db.DB.Query(query)
+	if err != nil {
+		return nil, fmt.Errorf("error executing query: %v", err)
 	}
+	defer rows.Close()
+
+	// Initialize a slice to store the retrieved posts
+	var posts []PostJSON
+
+	// Iterate through the rows and populate the posts slice
+	for rows.Next() {
+		var postJSON PostJSON
+		var timestampStr string
+
+		err := rows.Scan(&postJSON.ID, &postJSON.ThreadID, &postJSON.AuthorID, &postJSON.Content, &timestampStr)
+		if err != nil {
+			return nil, fmt.Errorf("error scanning row: %v", err)
+		}
+
+		// Convert the timestamp from string to time.Time
+		timestamp, err := time.Parse("2006-01-02 15:04:05", timestampStr)
+		if err != nil {
+			return nil, fmt.Errorf("error parsing timestamp: %v", err)
+		}
+		postJSON.Timestamp = timestamp.Format("2006-01-02 15:04:05")
+
+		posts = append(posts, postJSON)
+	}
+
+	// Check for errors from iterating over rows
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating over rows: %v", err)
+	}
+
+	// Print the number of retrieved posts for debugging
+	fmt.Printf("Number of retrieved posts: %d\n", len(posts))
+
 	return posts, nil
 }
 
-//// GetPostByID retrieves a post by ID from the database
-//func GetPostByID(db *database.Database, postID string) (*models.Post, error) {
-//	query := "SELECT id, thread_id, author_id, content, timestamp FROM posts WHERE id = ?"
-//	var post models.Post
-//
-//	err := db.DB.QueryRow(query, postID).Scan(&post.ID, &post.ThreadID, &post.AuthorID, &post.Content, &post.Timestamp)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	return &post, nil
-//}
+// GetPostByID retrieves a post by ID from the database
+func GetPostByID(db *database.Database, postID string) (*PostJSON, error) {
+	query := "SELECT id, thread_id, author_id, content, timestamp FROM posts WHERE id = ?"
+	var postJSON PostJSON
+	var timestampStr string
 
-// GetPostByID retrieves a post by ID, first checking a local set and then the database
-func GetPostByID(db *database.Database, postID string) (*models.Post, error) {
-	localPosts := map[string]models.Post{
-		"1": {
-			ID:        1,
-			ThreadID:  1,
-			AuthorID:  1,
-			Content:   "Sample post content 1",
-			Timestamp: time.Now(),
-		},
-		"2": {
-			ID:        2,
-			ThreadID:  1,
-			AuthorID:  2,
-			Content:   "Sample post content 2",
-			Timestamp: time.Now(),
-		},
-	}
-
-	// Check if the post ID exists in the local set
-	if localPost, ok := localPosts[postID]; ok {
-		return &localPost, nil
-	}
-
-	// If not found in the local set, proceed with the database query
-	query := "SELECT id, author_id, thread_id, content FROM posts WHERE id = ?"
-	var post models.Post
-
-	err := db.DB.QueryRow(query, postID).Scan(&post.ID, &post.AuthorID, &post.ThreadID, &post.Content)
+	err := db.DB.QueryRow(query, postID).Scan(&postJSON.ID, &postJSON.ThreadID, &postJSON.AuthorID, &postJSON.Content, &timestampStr)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error executing query: %v", err)
 	}
 
-	return &post, nil
+	// Convert the timestamp from string to time.Time
+	timestamp, err := time.Parse("2006-01-02 15:04:05", timestampStr)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing timestamp: %v", err)
+	}
+	postJSON.Timestamp = timestamp.Format("2006-01-02 15:04:05")
+
+	return &postJSON, nil
 }

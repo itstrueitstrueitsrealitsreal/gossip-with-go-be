@@ -1,20 +1,41 @@
 package database
 
-import "database/sql"
+import (
+	"database/sql"
+	"fmt"
+	"github.com/go-sql-driver/mysql"
+	"os"
+)
 
 type Database struct {
 	DB *sql.DB
 }
 
-// GetDB initialises a new Database instance.
+// GetDB initializes a new Database instance and opens a MySQL database connection.
 func GetDB() (*Database, error) {
-	//db, err := sql.Open("mysql", "gossip")
-	//if err != nil {
-	//	return nil, err
-	//}
+	// Capture connection properties.
+	cfg := mysql.Config{
+		User:   os.Getenv("DBUSER"),
+		Passwd: os.Getenv("DBPASS"),
+		Net:    "tcp",
+		Addr:   "127.0.0.1:3306",
+		DBName: "gossip",
+	}
+	dataSourceName := cfg.FormatDSN()
 
-	//return &Database{DB: db}, nil
-	return &Database{}, nil
+	db, err := sql.Open("mysql", dataSourceName)
+	if err != nil {
+		return nil, err
+	}
+
+	err = db.Ping()
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println("Connected to the database")
+
+	return &Database{DB: db}, nil
 }
 
 // Close closes the database connection.
@@ -27,7 +48,7 @@ func (d *Database) CreateTables() error {
 	_, err := d.DB.Exec(`
 		CREATE TABLE IF NOT EXISTS users (
 			id INT PRIMARY KEY AUTO_INCREMENT,
-			username VARCHAR(128) UNIQUE NOT NULL
+			name VARCHAR(128) UNIQUE NOT NULL
 		);
 
 		CREATE TABLE IF NOT EXISTS tags (

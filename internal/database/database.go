@@ -6,14 +6,15 @@ type Database struct {
 	DB *sql.DB
 }
 
-// GetDB initialises a new Databse instance.
+// GetDB initialises a new Database instance.
 func GetDB() (*Database, error) {
-	db, err := sql.Open("mysql", "gossip")
-	if err != nil {
-		return nil, err
-	}
+	//db, err := sql.Open("mysql", "gossip")
+	//if err != nil {
+	//	return nil, err
+	//}
 
-	return &Database{DB: db}, nil
+	//return &Database{DB: db}, nil
+	return &Database{}, nil
 }
 
 // Close closes the database connection.

@@ -56,24 +56,24 @@ func GetRoutes() func(r chi.Router) {
 				w.Header().Set("Content-Type", "application/json")
 				json.NewEncoder(w).Encode(response.Payload)
 			})
-			//
-			//	r.Post("/", func(w http.ResponseWriter, req *http.Request) {
-			//		response, _ := handlers.HandleCreateThread(w, req)
-			//		w.Header().Set("Content-Type", "application/json")
-			//		json.NewEncoder(w).Encode(response)
-			//	})
-			//
-			//	r.Put("/{id}", func(w http.ResponseWriter, req *http.Request) {
-			//		response, _ := handlers.HandleUpdateThread(w, req)
-			//		w.Header().Set("Content-Type", "application/json")
-			//		json.NewEncoder(w).Encode(response)
-			//	})
-			//
-			//	r.Delete("/{id}", func(w http.ResponseWriter, req *http.Request) {
-			//		response, _ := handlers.HandleDeleteThread(w, req)
-			//		w.Header().Set("Content-Type", "application/json")
-			//		json.NewEncoder(w).Encode(response)
-			//	})
+
+			r.Post("/", func(w http.ResponseWriter, req *http.Request) {
+				response, _ := handlers.HandleCreateThread(w, req)
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode(response)
+			})
+
+			r.Put("/{id}", func(w http.ResponseWriter, req *http.Request) {
+				response, _ := handlers.HandleUpdateThread(w, req)
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode(response)
+			})
+
+			r.Delete("/{id}", func(w http.ResponseWriter, req *http.Request) {
+				response, _ := handlers.HandleDeleteThread(w, req)
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode(response)
+			})
 		})
 
 		// Posts routes
@@ -89,7 +89,8 @@ func GetRoutes() func(r chi.Router) {
 				w.Header().Set("Content-Type", "application/json")
 				json.NewEncoder(w).Encode(response.Payload)
 			})
-
+			// TODO
+			// Implement CUD for posts
 			//	r.Post("/", func(w http.ResponseWriter, req *http.Request) {
 			//		response, _ := handlers.HandleCreatePost(w, req)
 			//		w.Header().Set("Content-Type", "application/json")

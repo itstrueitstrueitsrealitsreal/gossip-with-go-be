@@ -1,8 +1,11 @@
 package users
 
 import (
+	"database/sql"
+	"fmt"
 	"github.com/CVWO/sample-go-app/internal/database"
 	"github.com/CVWO/sample-go-app/internal/models"
+	"github.com/pkg/errors"
 )
 
 func List(db *database.Database) ([]models.Tag, error) {
@@ -48,4 +51,105 @@ func GetUserByID(db *database.Database, userID string) (*models.Tag, error) {
 	}
 
 	return &user, nil
+}
+
+// GetUserByName retrieves a user by their name from the database.
+func GetUserByName(db *database.Database, name string) (*models.User, error) {
+	query := "SELECT id, name FROM users WHERE name = ?"
+	var user models.User
+
+	err := db.DB.QueryRow(query, name).Scan(&user.ID, &user.Name)
+	if err == sql.ErrNoRows {
+		// User not found
+		return nil, nil
+	} else if err != nil {
+		// Other error
+		return nil, fmt.Errorf("error executing query: %v", err)
+	}
+
+	return &user, nil
+}
+
+// Delete removes a user from the database by ID.
+func Delete(db *database.Database, userID string) error {
+	deleteUserQuery := "DELETE FROM users WHERE id = ?"
+	stmt, err := db.DB.Prepare(deleteUserQuery)
+	if err != nil {
+		return errors.Wrap(err, "error preparing delete user statement")
+	}
+	defer stmt.Close()
+
+	result, err := stmt.Exec(userID)
+	if err != nil {
+		return errors.Wrap(err, "error executing delete user statement")
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return errors.Wrap(err, "error getting rows affected after delete user statement")
+	}
+
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
+}
+
+// Create inserts a new user into the database.
+func Create(db *database.Database, userInput UserInput) (*models.User, error) {
+	// Check if the user with the same name already exists
+	existingUser, err := GetUserByName(db, userInput.Name)
+	if err != nil {
+		return nil, fmt.Errorf("error checking existing user: %v", err)
+	}
+
+	if existingUser != nil {
+		return nil, fmt.Errorf("user with name %s already exists", userInput.Name)
+	}
+
+	// Insert the new user into the database
+	query := "INSERT INTO users (name) VALUES (?)"
+	result, err := db.DB.Exec(query, userInput.Name)
+	if err != nil {
+		return nil, fmt.Errorf("error executing query: %v", err)
+	}
+
+	// Get the ID of the newly inserted user
+	userID, err := result.LastInsertId()
+	if err != nil {
+		return nil, fmt.Errorf("error getting last insert ID: %v", err)
+	}
+
+	// Return the newly created user
+	return &models.User{
+		ID:   int(userID),
+		Name: userInput.Name,
+	}, nil
+}
+
+// Update updates the user with the specified ID in the database.
+func Update(db *database.Database, userID string, userInput UserInput) (*models.User, error) {
+	// Check if the user with the given ID exists
+	existingUser, err := GetUserByID(db, userID)
+	if err != nil {
+		return nil, fmt.Errorf("error checking existing user: %v", err)
+	}
+
+	if existingUser == nil {
+		return nil, fmt.Errorf("user with ID %s not found", userID)
+	}
+
+	// Update the user's name
+	query := "UPDATE users SET name = ? WHERE id = ?"
+	_, err = db.DB.Exec(query, userInput.Name, userID)
+	if err != nil {
+		return nil, fmt.Errorf("error executing query: %v", err)
+	}
+
+	// Return the updated user
+	return &models.User{
+		ID:   existingUser.ID,
+		Name: userInput.Name,
+	}, nil
 }

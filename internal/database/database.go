@@ -1,12 +1,16 @@
+// internal/database/database.go
+
 package database
 
 import (
 	"database/sql"
 	"fmt"
-	"github.com/go-sql-driver/mysql"
 	"os"
+
+	"github.com/go-sql-driver/mysql"
 )
 
+// Database represents the database connection.
 type Database struct {
 	DB *sql.DB
 }

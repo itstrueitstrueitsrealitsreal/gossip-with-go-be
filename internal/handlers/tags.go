@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	ListTags = "tags.HandleList"
-
+	ListTags                  = "tags.HandleList"
+	SuccessfulViewTagMessage  = "Successfully viewed tag"
 	SuccessfulListTagsMessage = "Successfully listed tags"
 	ErrRetrieveTags           = "Failed to retrieve tags in %s"
 )
@@ -71,5 +71,6 @@ func HandleGetTag(w http.ResponseWriter, r *http.Request) (*api.Response, error)
 		Payload: api.Payload{
 			Data: data,
 		},
+		Messages: []string{SuccessfulViewTagMessage},
 	}, nil
 }

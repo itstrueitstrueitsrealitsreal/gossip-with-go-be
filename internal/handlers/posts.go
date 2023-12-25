@@ -23,6 +23,7 @@ const (
 	ErrUpdatePost               = "Failed to update post"
 	SuccessfulDeletePostMessage = "Successfully deleted post"
 	ErrDeletePost               = "Failed to delete post"
+	SuccessfulViewPostMessage   = "Successfully viewed post"
 )
 
 // HandleListPosts returns all posts in JSON format
@@ -75,6 +76,7 @@ func HandleGetPost(w http.ResponseWriter, r *http.Request) (*api.Response, error
 		Payload: api.Payload{
 			Data: data,
 		},
+		Messages: []string{SuccessfulViewPostMessage},
 	}, nil
 }
 

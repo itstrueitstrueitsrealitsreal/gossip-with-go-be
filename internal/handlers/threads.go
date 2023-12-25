@@ -21,6 +21,7 @@ const (
 	SuccessfulDeleteThreadMessage = "Successfully deleted thread"
 	SuccessfulListThreadsMessage  = "Successfully listed threads"
 	ErrRetrieveThreads            = "Failed to retrieve threads in %s"
+	SuccessfulViewThreadMessage   = "Successfully viewed thread"
 )
 
 func HandleListThreads(w http.ResponseWriter, r *http.Request) (*api.Response, error) {
@@ -74,6 +75,7 @@ func HandleGetThread(w http.ResponseWriter, r *http.Request) (*api.Response, err
 		Payload: api.Payload{
 			Data: data,
 		},
+		Messages: []string{SuccessfulViewThreadMessage},
 	}, nil
 }
 

@@ -24,6 +24,7 @@ const (
 	ErrUpdateUser               = "Failed to update user"
 	SuccessfulDeleteUserMessage = "Successfully deleted user"
 	ErrDeleteUser               = "Failed to delete user"
+	SuccessfulViewUserMessage   = "Successfully viewed user"
 )
 
 // HandleListUsers returns all users
@@ -80,6 +81,7 @@ func HandleGetUser(w http.ResponseWriter, r *http.Request) (*api.Response, error
 		Payload: api.Payload{
 			Data: data,
 		},
+		Messages: []string{SuccessfulViewUserMessage},
 	}, nil
 }
 

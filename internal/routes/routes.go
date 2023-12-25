@@ -48,13 +48,13 @@ func GetRoutes() func(r chi.Router) {
 			r.Get("/", func(w http.ResponseWriter, req *http.Request) {
 				response, _ := handlers.HandleListThreads(w, req)
 				w.Header().Set("Content-Type", "application/json")
-				json.NewEncoder(w).Encode(response.Payload)
+				json.NewEncoder(w).Encode(response)
 			})
 
 			r.Get("/{id}", func(w http.ResponseWriter, req *http.Request) {
 				response, _ := handlers.HandleGetThread(w, req)
 				w.Header().Set("Content-Type", "application/json")
-				json.NewEncoder(w).Encode(response.Payload)
+				json.NewEncoder(w).Encode(response)
 			})
 
 			r.Post("/", func(w http.ResponseWriter, req *http.Request) {
@@ -81,13 +81,13 @@ func GetRoutes() func(r chi.Router) {
 			r.Get("/", func(w http.ResponseWriter, req *http.Request) {
 				response, _ := handlers.HandleListPosts(w, req)
 				w.Header().Set("Content-Type", "application/json")
-				json.NewEncoder(w).Encode(response.Payload)
+				json.NewEncoder(w).Encode(response)
 			})
 
 			r.Get("/{id}", func(w http.ResponseWriter, req *http.Request) {
 				response, _ := handlers.HandleGetPost(w, req)
 				w.Header().Set("Content-Type", "application/json")
-				json.NewEncoder(w).Encode(response.Payload)
+				json.NewEncoder(w).Encode(response)
 			})
 			r.Post("/", func(w http.ResponseWriter, req *http.Request) {
 				response, _ := handlers.HandleCreatePost(w, req)
@@ -113,13 +113,13 @@ func GetRoutes() func(r chi.Router) {
 			r.Get("/", func(w http.ResponseWriter, req *http.Request) {
 				response, _ := handlers.HandleListTags(w, req)
 				w.Header().Set("Content-Type", "application/json")
-				json.NewEncoder(w).Encode(response.Payload)
+				json.NewEncoder(w).Encode(response)
 			})
 
 			r.Get("/{id}", func(w http.ResponseWriter, req *http.Request) {
 				response, _ := handlers.HandleGetTag(w, req)
 				w.Header().Set("Content-Type", "application/json")
-				json.NewEncoder(w).Encode(response.Payload)
+				json.NewEncoder(w).Encode(response)
 			})
 		})
 	}

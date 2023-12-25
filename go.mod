@@ -1,4 +1,4 @@
-module github.com/CVWO/sample-go-app
+module github.com/itstrueitstrueitsrealitsreal/gossip-with-go
 
 go 1.18
 

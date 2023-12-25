@@ -1,7 +1,7 @@
 package database
 
 import (
-	"github.com/CVWO/sample-go-app/internal/models"
+	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go/internal/models"
 	"gorm.io/gorm"
 	"time"
 )

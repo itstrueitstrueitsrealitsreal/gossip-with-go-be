@@ -3,8 +3,8 @@ package users
 import (
 	"database/sql"
 	"fmt"
-	"github.com/CVWO/sample-go-app/internal/database"
-	"github.com/CVWO/sample-go-app/internal/models"
+	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go/internal/database"
+	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go/internal/models"
 	"github.com/pkg/errors"
 )
 

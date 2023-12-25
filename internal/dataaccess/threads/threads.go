@@ -2,7 +2,7 @@ package threads
 
 import (
 	"database/sql"
-	"github.com/CVWO/sample-go-app/internal/database"
+	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go/internal/database"
 	"strconv"
 )
 

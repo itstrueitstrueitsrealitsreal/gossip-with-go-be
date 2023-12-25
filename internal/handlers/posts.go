@@ -3,10 +3,10 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/CVWO/sample-go-app/internal/api"
-	"github.com/CVWO/sample-go-app/internal/dataaccess/posts"
-	"github.com/CVWO/sample-go-app/internal/database"
 	"github.com/go-chi/chi/v5"
+	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go/internal/api"
+	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go/internal/dataaccess/posts"
+	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go/internal/database"
 	"github.com/pkg/errors"
 	"net/http"
 	"time"

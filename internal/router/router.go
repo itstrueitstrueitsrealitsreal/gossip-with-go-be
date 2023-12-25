@@ -1,8 +1,8 @@
 package router
 
 import (
-	"github.com/CVWO/sample-go-app/internal/routes"
 	"github.com/go-chi/chi/v5"
+	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go/internal/routes"
 )
 
 func Setup() *chi.Mux {

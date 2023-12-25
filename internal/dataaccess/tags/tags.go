@@ -5,6 +5,7 @@ import (
 	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/models"
 )
 
+// List retrieves a list of all tags in the database.
 func List(db *database.Database) ([]models.Tag, error) {
 	// Query to select tags from the database
 	query := "SELECT id, name FROM tags"
@@ -37,7 +38,7 @@ func List(db *database.Database) ([]models.Tag, error) {
 	return tags, nil
 }
 
-// GetTagByID retrieves a tag by ID from the database
+// GetTagByID retrieves a tag by ID from the database.
 func GetTagByID(db *database.Database, tagID string) (*models.Tag, error) {
 	query := "SELECT id, name FROM tags WHERE id = ?"
 	var tag models.Tag

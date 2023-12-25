@@ -19,7 +19,7 @@ const (
 	ErrRetrieveTags           = "Failed to retrieve tags in %s"
 )
 
-// HandleListTags returns all tags in a json format
+// HandleListTags returns all tags in a JSON format.
 func HandleListTags(w http.ResponseWriter, r *http.Request) (*api.Response, error) {
 	db, err := database.GetDB()
 
@@ -45,7 +45,7 @@ func HandleListTags(w http.ResponseWriter, r *http.Request) (*api.Response, erro
 	}, nil
 }
 
-// HandleGetTag retrieves a single tag by ID
+// HandleGetTag retrieves a single tag by ID.
 func HandleGetTag(w http.ResponseWriter, r *http.Request) (*api.Response, error) {
 	tagID := chi.URLParam(r, "id")
 	if tagID == "" {

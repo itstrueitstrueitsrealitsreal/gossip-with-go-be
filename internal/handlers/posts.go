@@ -7,6 +7,7 @@ import (
 	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/api"
 	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/dataaccess/posts"
 	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/database"
+	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/models"
 	"github.com/pkg/errors"
 	"net/http"
 	"time"
@@ -26,7 +27,7 @@ const (
 	SuccessfulViewPostMessage   = "Successfully viewed post"
 )
 
-// HandleListPosts returns all posts in JSON format
+// HandleListPosts returns all posts in JSON format.
 func HandleListPosts(w http.ResponseWriter, r *http.Request) (*api.Response, error) {
 	db, err := database.GetDB()
 	if err != nil {
@@ -50,7 +51,7 @@ func HandleListPosts(w http.ResponseWriter, r *http.Request) (*api.Response, err
 	}, nil
 }
 
-// HandleGetPost retrieves a single post by ID
+// HandleGetPost retrieves a single post by ID.
 func HandleGetPost(w http.ResponseWriter, r *http.Request) (*api.Response, error) {
 	postID := chi.URLParam(r, "id")
 	if postID == "" {
@@ -80,9 +81,9 @@ func HandleGetPost(w http.ResponseWriter, r *http.Request) (*api.Response, error
 	}, nil
 }
 
-// HandleCreatePost creates a new post and inserts it into the database
+// HandleCreatePost creates a new post and inserts it into the database.
 func HandleCreatePost(w http.ResponseWriter, r *http.Request) (*api.Response, error) {
-	var postInput posts.PostInput
+	var postInput models.PostInput
 
 	if err := json.NewDecoder(r.Body).Decode(&postInput); err != nil {
 		return nil, errors.Wrap(err, "Failed to decode post input")
@@ -118,14 +119,14 @@ func HandleCreatePost(w http.ResponseWriter, r *http.Request) (*api.Response, er
 	}, nil
 }
 
-// HandleUpdatePost updates a post's information in the database
+// HandleUpdatePost updates a post's information in the database.
 func HandleUpdatePost(w http.ResponseWriter, r *http.Request) (*api.Response, error) {
 	postID := chi.URLParam(r, "id")
 	if postID == "" {
 		return nil, errors.New("Post ID is missing")
 	}
 
-	var postInput posts.PostInput
+	var postInput models.PostInput
 
 	if err := json.NewDecoder(r.Body).Decode(&postInput); err != nil {
 		return nil, errors.Wrap(err, "Failed to decode updated post input")
@@ -161,7 +162,7 @@ func HandleUpdatePost(w http.ResponseWriter, r *http.Request) (*api.Response, er
 	}, nil
 }
 
-// HandleDeletePost deletes a post from the database
+// HandleDeletePost deletes a post from the database.
 func HandleDeletePost(w http.ResponseWriter, r *http.Request) (*api.Response, error) {
 	postID := chi.URLParam(r, "id")
 	if postID == "" {

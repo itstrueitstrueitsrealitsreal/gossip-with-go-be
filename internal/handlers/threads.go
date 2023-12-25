@@ -7,6 +7,7 @@ import (
 	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/api"
 	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/dataaccess/threads"
 	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/database"
+	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/models"
 	"github.com/pkg/errors"
 	"net/http"
 )
@@ -24,6 +25,7 @@ const (
 	SuccessfulViewThreadMessage   = "Successfully viewed thread"
 )
 
+// HandleListThreads returns all posts in JSON format.
 func HandleListThreads(w http.ResponseWriter, r *http.Request) (*api.Response, error) {
 	db, err := database.GetDB()
 
@@ -49,7 +51,7 @@ func HandleListThreads(w http.ResponseWriter, r *http.Request) (*api.Response, e
 	}, nil
 }
 
-// HandleGetThread retrieves a single thread by ID
+// HandleGetThread retrieves a single thread by ID.
 func HandleGetThread(w http.ResponseWriter, r *http.Request) (*api.Response, error) {
 	threadID := chi.URLParam(r, "id")
 	if threadID == "" {
@@ -79,9 +81,9 @@ func HandleGetThread(w http.ResponseWriter, r *http.Request) (*api.Response, err
 	}, nil
 }
 
-// HandleCreateThread creates a new thread and inserts it into the database
+// HandleCreateThread creates a new thread and inserts it into the database.
 func HandleCreateThread(w http.ResponseWriter, r *http.Request) (*api.Response, error) {
-	var threadInput threads.ThreadInput
+	var threadInput models.ThreadInput
 
 	if err := json.NewDecoder(r.Body).Decode(&threadInput); err != nil {
 		return nil, errors.Wrap(err, "Failed to decode thread input")
@@ -114,14 +116,14 @@ func HandleCreateThread(w http.ResponseWriter, r *http.Request) (*api.Response, 
 	}, nil
 }
 
-// HandleUpdateThread updates a thread's information in the database
+// HandleUpdateThread updates a thread's information in the database.
 func HandleUpdateThread(w http.ResponseWriter, r *http.Request) (*api.Response, error) {
 	threadID := chi.URLParam(r, "id")
 	if threadID == "" {
 		return nil, errors.New("Thread ID is missing")
 	}
 
-	var threadInput threads.ThreadInput
+	var threadInput models.ThreadInput
 
 	if err := json.NewDecoder(r.Body).Decode(&threadInput); err != nil {
 		return nil, errors.Wrap(err, "Failed to decode updated thread input")
@@ -154,7 +156,7 @@ func HandleUpdateThread(w http.ResponseWriter, r *http.Request) (*api.Response, 
 	}, nil
 }
 
-// HandleDeleteThread deletes a thread from the database
+// HandleDeleteThread deletes a thread from the database.
 func HandleDeleteThread(w http.ResponseWriter, r *http.Request) (*api.Response, error) {
 	threadID := chi.URLParam(r, "id")
 	if threadID == "" {

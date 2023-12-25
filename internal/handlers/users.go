@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/dataaccess/users"
+	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/models"
 	"net/http"
 
 	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/api"
@@ -27,7 +28,7 @@ const (
 	SuccessfulViewUserMessage   = "Successfully viewed user"
 )
 
-// HandleListUsers returns all users
+// HandleListUsers returns a list of all users in JSON format.
 func HandleListUsers(w http.ResponseWriter, r *http.Request) (*api.Response, error) {
 	db, err := database.GetDB()
 
@@ -55,7 +56,7 @@ func HandleListUsers(w http.ResponseWriter, r *http.Request) (*api.Response, err
 	}, nil
 }
 
-// HandleGetUser retrieves a single user by ID
+// HandleGetUser retrieves a single user by ID.
 func HandleGetUser(w http.ResponseWriter, r *http.Request) (*api.Response, error) {
 	userID := chi.URLParam(r, "id")
 	if userID == "" {
@@ -85,14 +86,14 @@ func HandleGetUser(w http.ResponseWriter, r *http.Request) (*api.Response, error
 	}, nil
 }
 
-// HandleUpdateUser updates a user's information in the database
+// HandleUpdateUser updates a user's information in the database.
 func HandleUpdateUser(w http.ResponseWriter, r *http.Request) (*api.Response, error) {
 	userID := chi.URLParam(r, "id")
 	if userID == "" {
 		return nil, errors.New("User ID is missing")
 	}
 
-	var userInput users.UserInput
+	var userInput models.UserInput
 
 	if err := json.NewDecoder(r.Body).Decode(&userInput); err != nil {
 		return nil, errors.Wrap(err, "Failed to decode updated user input")
@@ -123,9 +124,9 @@ func HandleUpdateUser(w http.ResponseWriter, r *http.Request) (*api.Response, er
 	}, nil
 }
 
-// HandleCreateUser creates a new user and inserts it into the database
+// HandleCreateUser creates a new user and inserts it into the database.
 func HandleCreateUser(w http.ResponseWriter, r *http.Request) (*api.Response, error) {
-	var userInput users.UserInput
+	var userInput models.UserInput
 
 	if err := json.NewDecoder(r.Body).Decode(&userInput); err != nil {
 		return nil, errors.Wrap(err, "Failed to decode user input")
@@ -156,7 +157,7 @@ func HandleCreateUser(w http.ResponseWriter, r *http.Request) (*api.Response, er
 	}, nil
 }
 
-// HandleDeleteUser deletes a user from the database
+// HandleDeleteUser deletes a user from the database.
 func HandleDeleteUser(w http.ResponseWriter, r *http.Request) (*api.Response, error) {
 	userID := chi.URLParam(r, "id")
 	if userID == "" {

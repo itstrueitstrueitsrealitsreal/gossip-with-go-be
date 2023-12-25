@@ -9,17 +9,8 @@ import (
 	"time"
 )
 
-// PostJSON is a struct used for JSON marshaling with a custom timestamp format
-type PostJSON struct {
-	ID        int    `json:"id"`
-	ThreadID  int    `json:"thread_id"`
-	AuthorID  int    `json:"author_id"`
-	Content   string `json:"content"`
-	Timestamp string `json:"timestamp"`
-}
-
 // List retrieves a list of posts from the database.
-func List(db *database.Database) ([]PostJSON, error) {
+func List(db *database.Database) ([]models.PostJSON, error) {
 	// Query to select posts from the database
 	query := "SELECT id, thread_id, author_id, content, timestamp FROM posts"
 
@@ -31,11 +22,11 @@ func List(db *database.Database) ([]PostJSON, error) {
 	defer rows.Close()
 
 	// Initialize a slice to store the retrieved posts
-	var posts []PostJSON
+	var posts []models.PostJSON
 
 	// Iterate through the rows and populate the posts slice
 	for rows.Next() {
-		var postInput PostJSON
+		var postInput models.PostJSON
 		var timestampStr string
 
 		err := rows.Scan(&postInput.ID, &postInput.ThreadID, &postInput.AuthorID, &postInput.Content, &timestampStr)
@@ -62,9 +53,9 @@ func List(db *database.Database) ([]PostJSON, error) {
 }
 
 // GetPostByID retrieves a post by ID from the database
-func GetPostByID(db *database.Database, postID string) (*PostJSON, error) {
+func GetPostByID(db *database.Database, postID string) (*models.PostJSON, error) {
 	query := "SELECT id, thread_id, author_id, content, timestamp FROM posts WHERE id = ?"
-	var postInput PostJSON
+	var postInput models.PostJSON
 	var timestampStr string
 
 	err := db.DB.QueryRow(query, postID).Scan(&postInput.ID, &postInput.ThreadID, &postInput.AuthorID, &postInput.Content, &timestampStr)
@@ -83,7 +74,7 @@ func GetPostByID(db *database.Database, postID string) (*PostJSON, error) {
 }
 
 // Create inserts a new post into the database.
-func Create(db *database.Database, postInput PostInput, timestamp time.Time) (*models.Post, error) {
+func Create(db *database.Database, postInput models.PostInput, timestamp time.Time) (*models.Post, error) {
 	// Insert the new post into the database
 	query := "INSERT INTO posts (thread_id, author_id, content, timestamp) VALUES (?, ?, ?, ?)"
 	result, err := db.DB.Exec(query, postInput.ThreadID, postInput.AuthorID, postInput.Content, timestamp)
@@ -108,7 +99,7 @@ func Create(db *database.Database, postInput PostInput, timestamp time.Time) (*m
 }
 
 // Update updates the post with the specified ID in the database.
-func Update(db *database.Database, postID string, postInput PostInput, timestamp time.Time) (*models.Post, error) {
+func Update(db *database.Database, postID string, postInput models.PostInput, timestamp time.Time) (*models.Post, error) {
 	// Check if the post with the given ID exists
 	existingPost, err := GetPostByID(db, postID)
 	if err != nil {

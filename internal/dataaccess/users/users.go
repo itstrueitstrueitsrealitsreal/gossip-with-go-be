@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// List retrieves a list of all users from the database.
 func List(db *database.Database) ([]models.Tag, error) {
 	// Query to select users from the database
 	query := "SELECT id, name FROM users"
@@ -70,34 +71,8 @@ func GetUserByName(db *database.Database, name string) (*models.User, error) {
 	return &user, nil
 }
 
-// Delete removes a user from the database by ID.
-func Delete(db *database.Database, userID string) error {
-	deleteUserQuery := "DELETE FROM users WHERE id = ?"
-	stmt, err := db.DB.Prepare(deleteUserQuery)
-	if err != nil {
-		return errors.Wrap(err, "error preparing delete user statement")
-	}
-	defer stmt.Close()
-
-	result, err := stmt.Exec(userID)
-	if err != nil {
-		return errors.Wrap(err, "error executing delete user statement")
-	}
-
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return errors.Wrap(err, "error getting rows affected after delete user statement")
-	}
-
-	if rowsAffected == 0 {
-		return sql.ErrNoRows
-	}
-
-	return nil
-}
-
 // Create inserts a new user into the database.
-func Create(db *database.Database, userInput UserInput) (*models.User, error) {
+func Create(db *database.Database, userInput models.UserInput) (*models.User, error) {
 	// Check if the user with the same name already exists
 	existingUser, err := GetUserByName(db, userInput.Name)
 	if err != nil {
@@ -129,7 +104,7 @@ func Create(db *database.Database, userInput UserInput) (*models.User, error) {
 }
 
 // Update updates the user with the specified ID in the database.
-func Update(db *database.Database, userID string, userInput UserInput) (*models.User, error) {
+func Update(db *database.Database, userID string, userInput models.UserInput) (*models.User, error) {
 	// Check if the user with the given ID exists
 	existingUser, err := GetUserByID(db, userID)
 	if err != nil {
@@ -152,4 +127,30 @@ func Update(db *database.Database, userID string, userInput UserInput) (*models.
 		ID:   existingUser.ID,
 		Name: userInput.Name,
 	}, nil
+}
+
+// Delete removes a user from the database by ID.
+func Delete(db *database.Database, userID string) error {
+	deleteUserQuery := "DELETE FROM users WHERE id = ?"
+	stmt, err := db.DB.Prepare(deleteUserQuery)
+	if err != nil {
+		return errors.Wrap(err, "error preparing delete user statement")
+	}
+	defer stmt.Close()
+
+	result, err := stmt.Exec(userID)
+	if err != nil {
+		return errors.Wrap(err, "error executing delete user statement")
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return errors.Wrap(err, "error getting rows affected after delete user statement")
+	}
+
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
 }

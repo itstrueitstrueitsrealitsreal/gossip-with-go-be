@@ -1,8 +1,8 @@
 package tags
 
 import (
-	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go/internal/database"
-	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go/internal/models"
+	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/database"
+	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/models"
 )
 
 func List(db *database.Database) ([]models.Tag, error) {

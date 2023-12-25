@@ -2,7 +2,7 @@ package routes
 
 import (
 	"encoding/json"
-	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go/internal/handlers"
+	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/handlers"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"

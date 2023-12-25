@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-chi/chi/v5"
-	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go/internal/dataaccess/tags"
+	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/dataaccess/tags"
 	"net/http"
 
-	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go/internal/api"
-	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go/internal/database"
+	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/api"
+	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/database"
 	"github.com/pkg/errors"
 )
 

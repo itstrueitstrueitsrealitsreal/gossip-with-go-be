@@ -3,8 +3,8 @@ package posts
 import (
 	"database/sql"
 	"fmt"
-	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go/internal/database"
-	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go/internal/models"
+	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/database"
+	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/models"
 	"github.com/pkg/errors"
 	"time"
 )

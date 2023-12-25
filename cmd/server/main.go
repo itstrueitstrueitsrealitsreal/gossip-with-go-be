@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go/internal/router"
+	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/router"
 )
 
 func main() {

@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
 )
 
 // Database represents the database connection.
@@ -15,19 +15,13 @@ type Database struct {
 	DB *sql.DB
 }
 
-// GetDB initializes a new Database instance and opens a MySQL database connection.
+// GetDB initializes a new Database instance and opens a PostgreSQL database connection.
 func GetDB() (*Database, error) {
 	// Capture connection properties.
-	cfg := mysql.Config{
-		User:   os.Getenv("DBUSER"),
-		Passwd: os.Getenv("DBPASS"),
-		Net:    "tcp",
-		Addr:   "127.0.0.1:3306",
-		DBName: "gossip",
-	}
-	dataSourceName := cfg.FormatDSN()
+	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		"127.0.0.1", "5432", os.Getenv("DBUSER"), os.Getenv("DBPASS"), "gossip")
 
-	db, err := sql.Open("mysql", dataSourceName)
+	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		return nil, err
 	}
@@ -51,17 +45,17 @@ func (d *Database) Close() error {
 func (d *Database) CreateTables() error {
 	_, err := d.DB.Exec(`
 		CREATE TABLE IF NOT EXISTS users (
-			id INT PRIMARY KEY AUTO_INCREMENT,
+			id SERIAL PRIMARY KEY,
 			name VARCHAR(128) UNIQUE NOT NULL
 		);
 
 		CREATE TABLE IF NOT EXISTS tags (
-			id INT PRIMARY KEY AUTO_INCREMENT,
+			id SERIAL PRIMARY KEY,
 			name VARCHAR(16) NOT NULL
 		);
 
 		CREATE TABLE IF NOT EXISTS threads (
-			id INT PRIMARY KEY AUTO_INCREMENT,
+			id SERIAL PRIMARY KEY,
 			author_id INT,
 			tag_id INT,
 			title VARCHAR(255) NOT NULL,
@@ -71,11 +65,11 @@ func (d *Database) CreateTables() error {
 		);
 
 		CREATE TABLE IF NOT EXISTS posts (
-			id INT PRIMARY KEY AUTO_INCREMENT,
+			id SERIAL PRIMARY KEY,
 			thread_id INT,
 			author_id INT,
 			content VARCHAR(1024) NOT NULL,
-			timestamp DATETIME NOT NULL,
+			timestamp TIMESTAMP NOT NULL,
 			FOREIGN KEY (thread_id) REFERENCES threads(id),
 			FOREIGN KEY (author_id) REFERENCES users(id)
 		);

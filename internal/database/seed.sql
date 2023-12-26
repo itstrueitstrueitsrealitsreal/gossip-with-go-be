@@ -3,22 +3,22 @@ DROP DATABASE IF EXISTS gossip;
 
 CREATE DATABASE IF NOT EXISTS gossip;
 
-USE gossip;
+\c gossip;
 
 
 -- schema
 CREATE TABLE IF NOT EXISTS users (
-                                     id INT PRIMARY KEY AUTO_INCREMENT,
+                                     id SERIAL PRIMARY KEY,
                                      name VARCHAR(128) UNIQUE NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS tags (
-                                    id INT PRIMARY KEY AUTO_INCREMENT,
+                                    id SERIAL PRIMARY KEY,
                                     name VARCHAR(16) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS threads (
-                                       id INT PRIMARY KEY AUTO_INCREMENT,
+                                       id SERIAL PRIMARY KEY,
                                        author_id INT,
                                        tag_id INT,
                                        title VARCHAR(255) NOT NULL,
@@ -28,11 +28,11 @@ CREATE TABLE IF NOT EXISTS threads (
 );
 
 CREATE TABLE IF NOT EXISTS posts (
-                                     id INT PRIMARY KEY AUTO_INCREMENT,
+                                     id SERIAL PRIMARY KEY,
                                      thread_id INT,
                                      author_id INT,
                                      content VARCHAR(1024) NOT NULL,
-                                     timestamp DATETIME NOT NULL,
+                                     timestamp TIMESTAMPTZ NOT NULL,
                                      FOREIGN KEY (thread_id) REFERENCES threads(id),
                                      FOREIGN KEY (author_id) REFERENCES users(id)
 );
@@ -56,4 +56,3 @@ INSERT INTO threads (id, author_id, tag_id, title, content) VALUES
 INSERT INTO posts (id, thread_id, author_id, content, timestamp) VALUES
                                                                      (1, 1, 1, 'Sample post content 1', NOW()),
                                                                      (2, 1, 2, 'Sample post content 2', NOW());
-

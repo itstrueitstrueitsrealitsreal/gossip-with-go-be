@@ -3,10 +3,12 @@ package posts
 import (
 	"database/sql"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/database"
 	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/models"
 	"github.com/pkg/errors"
-	"time"
 )
 
 // List retrieves a list of posts from the database.
@@ -19,7 +21,11 @@ func List(db *database.Database) ([]models.PostJSON, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error executing query: %v", err)
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			fmt.Printf("error closing rows: %v\n", err)
+		}
+	}()
 
 	// Initialize a slice to store the retrieved posts
 	var posts []models.PostJSON
@@ -35,7 +41,7 @@ func List(db *database.Database) ([]models.PostJSON, error) {
 		}
 
 		// Convert the timestamp from string to time.Time
-		timestamp, err := time.Parse("2006-01-02 15:04:05", timestampStr)
+		timestamp, err := time.Parse("2006-01-02T15:04:05.999999999Z07:00", timestampStr)
 		if err != nil {
 			return nil, fmt.Errorf("error parsing timestamp: %v", err)
 		}
@@ -54,7 +60,7 @@ func List(db *database.Database) ([]models.PostJSON, error) {
 
 // GetPostByID retrieves a post by ID from the database
 func GetPostByID(db *database.Database, postID string) (*models.PostJSON, error) {
-	query := "SELECT id, thread_id, author_id, content, timestamp FROM posts WHERE id = ?"
+	query := "SELECT id, thread_id, author_id, content, timestamp FROM posts WHERE id = $1"
 	var postInput models.PostJSON
 	var timestampStr string
 
@@ -64,7 +70,7 @@ func GetPostByID(db *database.Database, postID string) (*models.PostJSON, error)
 	}
 
 	// Convert the timestamp from string to time.Time
-	timestamp, err := time.Parse("2006-01-02 15:04:05", timestampStr)
+	timestamp, err := time.Parse("2006-01-02T15:04:05.999999999Z07:00", timestampStr)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing timestamp: %v", err)
 	}
@@ -76,21 +82,23 @@ func GetPostByID(db *database.Database, postID string) (*models.PostJSON, error)
 // Create inserts a new post into the database.
 func Create(db *database.Database, postInput models.PostInput, timestamp time.Time) (*models.Post, error) {
 	// Insert the new post into the database
-	query := "INSERT INTO posts (thread_id, author_id, content, timestamp) VALUES (?, ?, ?, ?)"
-	result, err := db.DB.Exec(query, postInput.ThreadID, postInput.AuthorID, postInput.Content, timestamp)
-	if err != nil {
-		return nil, fmt.Errorf("error executing query: %v", err)
-	}
+	query := "INSERT INTO posts (thread_id, author_id, content, timestamp) VALUES ($1, $2, $3, $4) RETURNING id"
+	row := db.DB.QueryRow(query, postInput.ThreadID, postInput.AuthorID, postInput.Content, timestamp)
 
 	// Get the ID of the newly inserted post
-	postID, err := result.LastInsertId()
+	var postID int
+	err := row.Scan(&postID)
 	if err != nil {
+		// Check if the error is due to duplicate key value violation
+		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
+			return nil, fmt.Errorf("failed to create post: post with the same ID already exists")
+		}
 		return nil, fmt.Errorf("error getting last insert ID: %v", err)
 	}
 
 	// Return the newly created post
 	return &models.Post{
-		ID:        int(postID),
+		ID:        postID,
 		ThreadID:  postInput.ThreadID,
 		AuthorID:  postInput.AuthorID,
 		Content:   postInput.Content,
@@ -111,7 +119,7 @@ func Update(db *database.Database, postID string, postInput models.PostInput, ti
 	}
 
 	// Update the post's information
-	query := "UPDATE posts SET thread_id = ?, author_id = ?, content = ?, timestamp = ? WHERE id = ?"
+	query := "UPDATE posts SET thread_id = $1, author_id = $2, content = $3, timestamp = $4 WHERE id = $5"
 	_, err = db.DB.Exec(query, postInput.ThreadID, postInput.AuthorID, postInput.Content, timestamp, postID)
 	if err != nil {
 		return nil, fmt.Errorf("error executing query: %v", err)
@@ -129,7 +137,7 @@ func Update(db *database.Database, postID string, postInput models.PostInput, ti
 
 // Delete removes a post from the database by ID.
 func Delete(db *database.Database, postID string) error {
-	deletePostQuery := "DELETE FROM posts WHERE id = ?"
+	deletePostQuery := "DELETE FROM posts WHERE id = $1"
 	stmt, err := db.DB.Prepare(deletePostQuery)
 	if err != nil {
 		return errors.Wrap(err, "error preparing delete post statement")

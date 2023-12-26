@@ -40,7 +40,7 @@ func List(db *database.Database) ([]models.Tag, error) {
 
 // GetTagByID retrieves a tag by ID from the database.
 func GetTagByID(db *database.Database, tagID string) (*models.Tag, error) {
-	query := "SELECT id, name FROM tags WHERE id = ?"
+	query := "SELECT id, name FROM tags WHERE id = $1"
 	var tag models.Tag
 
 	err := db.DB.QueryRow(query, tagID).Scan(&tag.ID, &tag.Name)

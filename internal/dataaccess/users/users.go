@@ -3,9 +3,9 @@ package users
 import (
 	"database/sql"
 	"fmt"
+
 	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/database"
 	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/models"
-	"github.com/pkg/errors"
 )
 
 // List retrieves a list of all users from the database.
@@ -43,7 +43,7 @@ func List(db *database.Database) ([]models.Tag, error) {
 
 // GetUserByID retrieves a user by ID from the database
 func GetUserByID(db *database.Database, userID string) (*models.Tag, error) {
-	query := "SELECT id, name FROM users WHERE id = ?"
+	query := "SELECT id, name FROM users WHERE id = $1"
 	var user models.Tag
 
 	err := db.DB.QueryRow(query, userID).Scan(&user.ID, &user.Name)
@@ -56,7 +56,7 @@ func GetUserByID(db *database.Database, userID string) (*models.Tag, error) {
 
 // GetUserByName retrieves a user by their name from the database.
 func GetUserByName(db *database.Database, name string) (*models.User, error) {
-	query := "SELECT id, name FROM users WHERE name = ?"
+	query := "SELECT id, name FROM users WHERE name = $1"
 	var user models.User
 
 	err := db.DB.QueryRow(query, name).Scan(&user.ID, &user.Name)
@@ -84,16 +84,12 @@ func Create(db *database.Database, userInput models.UserInput) (*models.User, er
 	}
 
 	// Insert the new user into the database
-	query := "INSERT INTO users (name) VALUES (?)"
-	result, err := db.DB.Exec(query, userInput.Name)
+	query := "INSERT INTO users (name) VALUES ($1) RETURNING id"
+	var userID int
+
+	err = db.DB.QueryRow(query, userInput.Name).Scan(&userID)
 	if err != nil {
 		return nil, fmt.Errorf("error executing query: %v", err)
-	}
-
-	// Get the ID of the newly inserted user
-	userID, err := result.LastInsertId()
-	if err != nil {
-		return nil, fmt.Errorf("error getting last insert ID: %v", err)
 	}
 
 	// Return the newly created user
@@ -116,7 +112,7 @@ func Update(db *database.Database, userID string, userInput models.UserInput) (*
 	}
 
 	// Update the user's name
-	query := "UPDATE users SET name = ? WHERE id = ?"
+	query := "UPDATE users SET name = $1 WHERE id = $2"
 	_, err = db.DB.Exec(query, userInput.Name, userID)
 	if err != nil {
 		return nil, fmt.Errorf("error executing query: %v", err)
@@ -131,21 +127,21 @@ func Update(db *database.Database, userID string, userInput models.UserInput) (*
 
 // Delete removes a user from the database by ID.
 func Delete(db *database.Database, userID string) error {
-	deleteUserQuery := "DELETE FROM users WHERE id = ?"
+	deleteUserQuery := "DELETE FROM users WHERE id = $1"
 	stmt, err := db.DB.Prepare(deleteUserQuery)
 	if err != nil {
-		return errors.Wrap(err, "error preparing delete user statement")
+		return fmt.Errorf("error preparing delete user statement: %v", err)
 	}
 	defer stmt.Close()
 
 	result, err := stmt.Exec(userID)
 	if err != nil {
-		return errors.Wrap(err, "error executing delete user statement")
+		return fmt.Errorf("error executing delete user statement: %v", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return errors.Wrap(err, "error getting rows affected after delete user statement")
+		return fmt.Errorf("error getting rows affected after delete user statement: %v", err)
 	}
 
 	if rowsAffected == 0 {

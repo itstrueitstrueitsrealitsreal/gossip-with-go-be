@@ -5,6 +5,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"os"
 
 	_ "github.com/lib/pq"
@@ -18,9 +19,13 @@ type Database struct {
 // GetDB initializes a new Database instance and opens a PostgreSQL database connection.
 func GetDB() (*Database, error) {
 	// Capture connection properties.
-	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		"127.0.0.1", "5432", os.Getenv("DBUSER"), os.Getenv("DBPASS"), "gossip")
-
+	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=require",
+		os.Getenv("DBHOST"),
+		os.Getenv("DBPORT"),
+		os.Getenv("DBUSER"),
+		os.Getenv("DBPASS"),
+		os.Getenv("DBNAME"),
+	)
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		return nil, err
@@ -28,6 +33,7 @@ func GetDB() (*Database, error) {
 
 	err = db.Ping()
 	if err != nil {
+		log.Fatal(err)
 		return nil, err
 	}
 
@@ -69,10 +75,13 @@ func (d *Database) CreateTables() error {
 			thread_id INT,
 			author_id INT,
 			content VARCHAR(1024) NOT NULL,
-			timestamp TIMESTAMP NOT NULL,
+			timestamp TIMESTAMPTZ NOT NULL,
 			FOREIGN KEY (thread_id) REFERENCES threads(id),
 			FOREIGN KEY (author_id) REFERENCES users(id)
 		);
 	`)
+	if err != nil {
+		log.Fatal(err)
+	}
 	return err
 }

@@ -26,6 +26,7 @@ func GetDB() (*Database, error) {
 		os.Getenv("DBPASS"),
 		os.Getenv("DBNAME"),
 	)
+	fmt.Println(connStr)
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		return nil, err

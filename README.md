@@ -24,19 +24,43 @@ Download and install Go by following the instructions [here](https://go.dev/doc/
 This is the main file structure, which takes the Model-View-Controller design paradigm into account.
 ```
 .
-├── cmd
-│   ├── server
-├── internal
-│   ├── api         # Encapsulates types and utilities related to the API
-│   ├── dataacess   # Data Access layer accesses data from the database
-│   ├── database    # Encapsulates the types and utilities related to the database
-│   ├── handlers    # Handler functions to respond to requests
-│   ├── models      # Definitions of objects used in the application
-│   ├── router      # Encapsulates types and utilities related to the router
-│   ├── routes      # Defines routes that are used in the application
 ├── README.md
+├── cmd
+│   └── server
+│       └── main.go
+├── erdiagram.png
 ├── go.mod
-└── go.sum
+├── go.sum
+└── internal
+    ├── api                             # Encapsulates types and utilities related to the API
+    │   └── api.go
+    ├── dataaccess                      # Data Access layer accesses data from the database
+    │   ├── posts
+    │   │   └── posts.go
+    │   ├── tags
+    │   │   └── tags.go
+    │   ├── threads
+    │   │   └── threads.go
+    │   └── users
+    │       └── users.go
+    ├── database                        # Encapsulates the types and utilities related to the database
+    │   ├── database.go
+    │   └── seed.sql
+    ├── handlers                        # Handler functions to respond to requests
+    │   ├── posts.go
+    │   ├── tags.go
+    │   ├── threads.go
+    │   └── users.go
+    ├── models                          # Definitions of objects used in the application
+    │   ├── post.go
+    │   ├── tag.go
+    │   ├── thread.go
+    │   └── user.go
+    ├── router                          # Encapsulates types and utilities related to the router
+    │   └── router.go
+    └── routes                          # Defines routes that are used in the application
+        └── routes.go
+
 ```
 ### Schema
 <br/>

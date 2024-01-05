@@ -3,7 +3,7 @@
 DROP TABLE users CASCADE;
 DROP TABLE tags CASCADE;
 DROP TABLE threads CASCADE;
-DROP TABLE posts CASCADE;
+DROP TABLE comments CASCADE;
 
 \c gossip_jdw6;
 
@@ -28,7 +28,7 @@ CREATE TABLE threads (
                          FOREIGN KEY (tag_id) REFERENCES tags(id)
 );
 
-CREATE TABLE posts (
+CREATE TABLE comments (
                        id VARCHAR(50) PRIMARY KEY,
                        thread_id VARCHAR(50),
                        author_id VARCHAR(50),
@@ -71,8 +71,8 @@ INSERT INTO threads (id, author_id, tag_id, title, content) VALUES
                                                                 ('t7', 'u3', 't9', 'Forum Improvement Suggestions', 'Share your ideas on how we can enhance the forum experience.'),
                                                                 ('t8', 'u4', 't11', 'Reporting a Bug in the App', 'Encountered a bug? Report it here with details for a quick resolution.');
 
--- Insert sample posts
-INSERT INTO posts (id, thread_id, author_id, content, timestamp) VALUES
+-- Insert sample comments
+INSERT INTO comments (id, thread_id, author_id, content, timestamp) VALUES
                                                                      ('p1', 't1', 'u1', 'Best tip! Use arrow functions for concise code.', '2024-01-05 10:15:00'),
                                                                      ('p2', 't1', 'u2', 'I also recommend using destructuring in JavaScript.', '2024-01-05 10:30:00'),
                                                                      ('p3', 't2', 'u1', 'Machine learning is fascinating. Any good resources for beginners?', '2024-01-05 11:00:00'),

@@ -50,30 +50,31 @@ func (d *Database) Close() error {
 // CreateTables creates necessary tables in the database.
 func (d *Database) CreateTables() error {
 	_, err := d.DB.Exec(`
-		CREATE TABLE IF NOT EXISTS users (
-			id SERIAL PRIMARY KEY,
-			name VARCHAR(128) UNIQUE NOT NULL
+		CREATE TABLE users (
+			id VARCHAR(50) PRIMARY KEY,
+			username VARCHAR(128) UNIQUE NOT NULL,
+			password VARCHAR(128) NOT NULL
 		);
 
-		CREATE TABLE IF NOT EXISTS tags (
-			id SERIAL PRIMARY KEY,
-			name VARCHAR(16) NOT NULL
+		CREATE TABLE tags (
+			id VARCHAR(50) PRIMARY KEY,
+			name VARCHAR(32) NOT NULL
 		);
 
-		CREATE TABLE IF NOT EXISTS threads (
-			id SERIAL PRIMARY KEY,
-			author_id INT,
-			tag_id INT,
+		CREATE TABLE threads (
+			id VARCHAR(50) PRIMARY KEY,
+			author_id VARCHAR(50),
+			tag_id VARCHAR(50),
 			title VARCHAR(255) NOT NULL,
 			content VARCHAR(1024) NOT NULL,
 			FOREIGN KEY (author_id) REFERENCES users(id),
 			FOREIGN KEY (tag_id) REFERENCES tags(id)
 		);
 
-		CREATE TABLE IF NOT EXISTS posts (
-			id SERIAL PRIMARY KEY,
-			thread_id INT,
-			author_id INT,
+		CREATE TABLE comments (
+			id VARCHAR(50) PRIMARY KEY,
+			thread_id VARCHAR(50),
+			author_id VARCHAR(50),
 			content VARCHAR(1024) NOT NULL,
 			timestamp TIMESTAMPTZ NOT NULL,
 			FOREIGN KEY (thread_id) REFERENCES threads(id),

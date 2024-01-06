@@ -85,7 +85,7 @@ func Create(db *database.Database, userInput models.UserInput) (*models.User, er
 
 	// Insert the new user into the database
 	query := "INSERT INTO users (name) VALUES ($1) RETURNING id"
-	var userID int
+	var userID string
 
 	err = db.DB.QueryRow(query, userInput.Name).Scan(&userID)
 	if err != nil {
@@ -94,7 +94,7 @@ func Create(db *database.Database, userInput models.UserInput) (*models.User, er
 
 	// Return the newly created user
 	return &models.User{
-		ID:   int(userID),
+		ID:   userID,
 		Name: userInput.Name,
 	}, nil
 }

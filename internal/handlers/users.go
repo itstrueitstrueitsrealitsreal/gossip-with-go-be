@@ -3,10 +3,11 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/dataaccess/users"
 	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/models"
-	"net/http"
 
 	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/api"
 	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/database"
@@ -40,8 +41,6 @@ func HandleListUsers(w http.ResponseWriter, r *http.Request) (*api.Response, err
 	if err != nil {
 		return nil, errors.Wrap(err, fmt.Sprintf(ErrRetrieveUsers, ListUsers))
 	}
-	// Log userList using fmt.Printf
-	fmt.Printf("User List: %+v\n", userList)
 
 	data, err := json.Marshal(userList)
 	if err != nil {

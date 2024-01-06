@@ -9,9 +9,9 @@ import (
 )
 
 // List retrieves a list of all users from the database.
-func List(db *database.Database) ([]models.Tag, error) {
+func List(db *database.Database) ([]models.User, error) {
 	// Query to select users from the database
-	query := "SELECT id, name FROM users"
+	query := "SELECT id, username, password FROM users"
 
 	// Execute the query
 	rows, err := db.DB.Query(query)
@@ -21,12 +21,12 @@ func List(db *database.Database) ([]models.Tag, error) {
 	defer rows.Close()
 
 	// Initialize a slice to store the retrieved users
-	var users []models.Tag
+	var users []models.User
 
 	// Iterate through the rows and populate the users slice
 	for rows.Next() {
-		var user models.Tag
-		err := rows.Scan(&user.ID, &user.Name)
+		var user models.User
+		err := rows.Scan(&user.ID, &user.Username, &user.Password)
 		if err != nil {
 			return nil, err
 		}
@@ -42,11 +42,11 @@ func List(db *database.Database) ([]models.Tag, error) {
 }
 
 // GetUserByID retrieves a user by ID from the database
-func GetUserByID(db *database.Database, userID string) (*models.Tag, error) {
-	query := "SELECT id, name FROM users WHERE id = $1"
-	var user models.Tag
+func GetUserByID(db *database.Database, userID string) (*models.User, error) {
+	query := "SELECT id, username, password FROM users WHERE id = $1"
+	var user models.User
 
-	err := db.DB.QueryRow(query, userID).Scan(&user.ID, &user.Name)
+	err := db.DB.QueryRow(query, userID).Scan(&user.ID, &user.Username)
 	if err != nil {
 		return nil, err
 	}
@@ -54,12 +54,12 @@ func GetUserByID(db *database.Database, userID string) (*models.Tag, error) {
 	return &user, nil
 }
 
-// GetUserByName retrieves a user by their name from the database.
-func GetUserByName(db *database.Database, name string) (*models.User, error) {
-	query := "SELECT id, name FROM users WHERE name = $1"
+// GetUserByName retrieves a user by their username from the database.
+func GetUserByName(db *database.Database, username string) (*models.User, error) {
+	query := "SELECT id, username, password FROM users WHERE username = $1"
 	var user models.User
 
-	err := db.DB.QueryRow(query, name).Scan(&user.ID, &user.Name)
+	err := db.DB.QueryRow(query, username).Scan(&user.ID, &user.Username)
 	if err == sql.ErrNoRows {
 		// User not found
 		return nil, nil
@@ -73,29 +73,30 @@ func GetUserByName(db *database.Database, name string) (*models.User, error) {
 
 // Create inserts a new user into the database.
 func Create(db *database.Database, userInput models.UserInput) (*models.User, error) {
-	// Check if the user with the same name already exists
-	existingUser, err := GetUserByName(db, userInput.Name)
+	// Check if the user with the same username already exists
+	existingUser, err := GetUserByName(db, userInput.Username)
 	if err != nil {
 		return nil, fmt.Errorf("error checking existing user: %v", err)
 	}
 
 	if existingUser != nil {
-		return nil, fmt.Errorf("user with name %s already exists", userInput.Name)
+		return nil, fmt.Errorf("user with username %s already exists", userInput.Username)
 	}
 
 	// Insert the new user into the database
-	query := "INSERT INTO users (name) VALUES ($1) RETURNING id"
+	query := "INSERT INTO users (username) VALUES ($1) RETURNING id"
 	var userID string
 
-	err = db.DB.QueryRow(query, userInput.Name).Scan(&userID)
+	err = db.DB.QueryRow(query, userInput.Username).Scan(&userID)
 	if err != nil {
 		return nil, fmt.Errorf("error executing query: %v", err)
 	}
 
 	// Return the newly created user
 	return &models.User{
-		ID:   userID,
-		Name: userInput.Name,
+		ID:       userID,
+		Username: userInput.Username,
+		Password: userInput.Password,
 	}, nil
 }
 
@@ -111,17 +112,18 @@ func Update(db *database.Database, userID string, userInput models.UserInput) (*
 		return nil, fmt.Errorf("user with ID %s not found", userID)
 	}
 
-	// Update the user's name
-	query := "UPDATE users SET name = $1 WHERE id = $2"
-	_, err = db.DB.Exec(query, userInput.Name, userID)
+	// Update the user's username
+	query := "UPDATE users SET username = $1 WHERE id = $2"
+	_, err = db.DB.Exec(query, userInput.Username, userID)
 	if err != nil {
 		return nil, fmt.Errorf("error executing query: %v", err)
 	}
 
 	// Return the updated user
 	return &models.User{
-		ID:   existingUser.ID,
-		Name: userInput.Name,
+		ID:       existingUser.ID,
+		Username: userInput.Username,
+		Password: userInput.Password,
 	}, nil
 }
 

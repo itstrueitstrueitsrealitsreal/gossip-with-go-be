@@ -165,10 +165,10 @@ func GetRoutes() func(r chi.Router) {
 			})
 		})
 
-		// Posts routes
-		r.Route("/posts", func(r chi.Router) {
+		// Comments routes
+		r.Route("/comments", func(r chi.Router) {
 			r.Get("/", func(w http.ResponseWriter, req *http.Request) {
-				response, err := handlers.HandleListPosts(w, req)
+				response, err := handlers.HandleListComments(w, req)
 				if err != nil {
 					respondWithError(w, http.StatusInternalServerError, err.Error())
 					return
@@ -182,9 +182,9 @@ func GetRoutes() func(r chi.Router) {
 			})
 
 			r.Get("/{id}", func(w http.ResponseWriter, req *http.Request) {
-				response, err := handlers.HandleGetPost(w, req)
+				response, err := handlers.HandleGetComment(w, req)
 				if err != nil {
-					respondWithError(w, http.StatusNotFound, "Post not found")
+					respondWithError(w, http.StatusNotFound, "Comment not found")
 					return
 				}
 
@@ -196,7 +196,7 @@ func GetRoutes() func(r chi.Router) {
 			})
 
 			r.Post("/", func(w http.ResponseWriter, req *http.Request) {
-				response, err := handlers.HandleCreatePost(w, req)
+				response, err := handlers.HandleCreateComment(w, req)
 				if err != nil {
 					respondWithError(w, http.StatusBadRequest, err.Error())
 					return
@@ -210,7 +210,7 @@ func GetRoutes() func(r chi.Router) {
 			})
 
 			r.Put("/{id}", func(w http.ResponseWriter, req *http.Request) {
-				response, err := handlers.HandleUpdatePost(w, req)
+				response, err := handlers.HandleUpdateComment(w, req)
 				if err != nil {
 					respondWithError(w, http.StatusBadRequest, err.Error())
 					return
@@ -224,9 +224,9 @@ func GetRoutes() func(r chi.Router) {
 			})
 
 			r.Delete("/{id}", func(w http.ResponseWriter, req *http.Request) {
-				response, err := handlers.HandleDeletePost(w, req)
+				response, err := handlers.HandleDeleteComment(w, req)
 				if err != nil {
-					respondWithError(w, http.StatusNotFound, "Post not found")
+					respondWithError(w, http.StatusNotFound, "Comment not found")
 					return
 				}
 

@@ -3,14 +3,14 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/api"
-	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/dataaccess/posts"
 	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/database"
 	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/models"
 	"github.com/pkg/errors"
-	"net/http"
-	"time"
 )
 
 const (

@@ -3,7 +3,6 @@ package threads
 import (
 	"database/sql"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/itstrueitstrueitsrealitsreal/gossip-with-go-be/internal/database"
@@ -72,7 +71,7 @@ func Create(db *database.Database, input models.ThreadInput) (*models.Thread, er
 	}
 
 	// Retrieve the last insert ID
-	var lastInsertID int
+	var lastInsertID string
 	err = db.DB.QueryRow("SELECT currval(pg_get_serial_sequence('threads', 'id'))").Scan(&lastInsertID)
 	if err != nil {
 		return nil, err
@@ -98,7 +97,7 @@ func Update(db *database.Database, threadID string, input models.ThreadInput) (*
 	}
 
 	thread := &models.Thread{
-		ID:       atoi(threadID),
+		ID:       threadID,
 		AuthorID: input.AuthorID,
 		TagID:    input.TagID,
 		Title:    input.Title,
@@ -117,10 +116,4 @@ func Delete(db *database.Database, threadID string) error {
 	}
 
 	return nil
-}
-
-// Atoi converts ASCII values to integers.
-func atoi(s string) int {
-	i, _ := strconv.Atoi(s)
-	return i
 }

@@ -12,8 +12,12 @@ import (
 // List retrieves a list of threads from the database.
 func List(db *database.Database) ([]models.Thread, error) {
 	// Query to select threads from the database
-	query := "SELECT id, author_id, tag_id, title, content FROM threads"
-
+	query := `
+        SELECT threads.id, users.username, tags.name, threads.title, threads.content
+        FROM threads
+        INNER JOIN users ON threads.author_id = users.id
+        INNER JOIN tags ON threads.tag_id = tags.id
+    `
 	// Execute the query
 	rows, err := db.DB.Query(query)
 	if err != nil {
@@ -27,7 +31,7 @@ func List(db *database.Database) ([]models.Thread, error) {
 	// Iterate through the rows and populate the threads slice
 	for rows.Next() {
 		var thread models.Thread
-		err := rows.Scan(&thread.ID, &thread.AuthorID, &thread.TagID, &thread.Title, &thread.Content)
+		err := rows.Scan(&thread.ID, &thread.Author, &thread.Tag, &thread.Title, &thread.Content)
 		if err != nil {
 			return nil, err
 		}
@@ -47,7 +51,7 @@ func GetThreadByID(db *database.Database, threadID string) (*models.Thread, erro
 	query := "SELECT id, author_id, tag_id, title, content FROM threads WHERE id = $1"
 	var thread models.Thread
 
-	err := db.DB.QueryRow(query, threadID).Scan(&thread.ID, &thread.AuthorID, &thread.TagID, &thread.Title, &thread.Content)
+	err := db.DB.QueryRow(query, threadID).Scan(&thread.ID, &thread.Author, &thread.Tag, &thread.Title, &thread.Content)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
@@ -78,11 +82,11 @@ func Create(db *database.Database, input models.ThreadInput) (*models.Thread, er
 	}
 
 	thread := &models.Thread{
-		ID:       lastInsertID,
-		AuthorID: input.AuthorID,
-		TagID:    input.TagID,
-		Title:    input.Title,
-		Content:  input.Content,
+		ID:      lastInsertID,
+		Author:  input.AuthorID,
+		Tag:     input.TagID,
+		Title:   input.Title,
+		Content: input.Content,
 	}
 
 	return thread, nil
@@ -97,11 +101,11 @@ func Update(db *database.Database, threadID string, input models.ThreadInput) (*
 	}
 
 	thread := &models.Thread{
-		ID:       threadID,
-		AuthorID: input.AuthorID,
-		TagID:    input.TagID,
-		Title:    input.Title,
-		Content:  input.Content,
+		ID:      threadID,
+		Author:  input.AuthorID,
+		Tag:     input.TagID,
+		Title:   input.Title,
+		Content: input.Content,
 	}
 
 	return thread, nil

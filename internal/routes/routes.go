@@ -122,6 +122,20 @@ func GetRoutes() func(r chi.Router) {
 				}
 			})
 
+			r.Get("/{id}/comments", func(w http.ResponseWriter, req *http.Request) {
+				response, err := handlers.HandleGetCommentsByThread(w, req)
+				if err != nil {
+					respondWithError(w, http.StatusNotFound, "Thread not found")
+					return
+				}
+
+				w.Header().Set("Content-Type", "application/json")
+				err = json.NewEncoder(w).Encode(response)
+				if err != nil {
+					respondWithError(w, http.StatusInternalServerError, "Error encoding JSON response")
+				}
+			})
+
 			r.Post("/", func(w http.ResponseWriter, req *http.Request) {
 				response, err := handlers.HandleCreateThread(w, req)
 				if err != nil {

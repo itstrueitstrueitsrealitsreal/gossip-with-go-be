@@ -160,3 +160,34 @@ func Delete(db *database.Database, commentID string) error {
 
 	return nil
 }
+
+// GetCommentsByThreadID retrieves all comments for a specific thread by thread ID from the database
+func GetCommentsByThreadID(db *database.Database, threadID string) ([]models.CommentJSON, error) {
+	query := "SELECT id, thread_id, author_id, content, timestamp FROM comments WHERE thread_id = $1"
+	rows, err := db.DB.Query(query, threadID)
+	if err != nil {
+		return nil, fmt.Errorf("error executing query: %v", err)
+	}
+	defer rows.Close()
+
+	var comments []models.CommentJSON
+	for rows.Next() {
+		var comment models.CommentJSON
+		var timestampStr string
+		err := rows.Scan(&comment.ID, &comment.ThreadID, &comment.AuthorID, &comment.Content, &timestampStr)
+		if err != nil {
+			return nil, fmt.Errorf("error scanning row: %v", err)
+		}
+
+		// Convert the timestamp from string to time.Time
+		timestamp, err := time.Parse("2006-01-02T15:04:05.999999999Z07:00", timestampStr)
+		if err != nil {
+			return nil, fmt.Errorf("error parsing timestamp: %v", err)
+		}
+		comment.Timestamp = timestamp.Format("2006-01-02 15:04:05")
+
+		comments = append(comments, comment)
+	}
+
+	return comments, nil
+}

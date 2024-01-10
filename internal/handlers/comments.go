@@ -184,3 +184,33 @@ func HandleDeleteComment(w http.ResponseWriter, r *http.Request) (*api.Response,
 		Messages: []string{SuccessfulDeleteCommentMessage},
 	}, nil
 }
+
+// HandleGetCommentsByThread retrieves all comments for a specific thread by thread ID.
+func HandleGetCommentsByThread(w http.ResponseWriter, r *http.Request) (*api.Response, error) {
+	threadID := chi.URLParam(r, "id")
+	if threadID == "" {
+		return nil, errors.New("Thread ID is missing")
+	}
+
+	db, err := database.GetDB()
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to retrieve database in HandleGetCommentsByThread")
+	}
+
+	comments, err := comments.GetCommentsByThreadID(db, threadID)
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to retrieve comments in HandleGetCommentsByThread")
+	}
+
+	data, err := json.Marshal(comments)
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to encode comments in HandleGetCommentsByThread")
+	}
+
+	return &api.Response{
+		Payload: api.Payload{
+			Data: data,
+		},
+		Messages: []string{"Successfully retrieved comments"},
+	}, nil
+}

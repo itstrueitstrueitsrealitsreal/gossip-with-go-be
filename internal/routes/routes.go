@@ -19,6 +19,14 @@ func respondWithError(w http.ResponseWriter, statusCode int, errorMessage string
 
 func GetRoutes() func(r chi.Router) {
 	return func(r chi.Router) {
+		// Default route
+		r.Get("/", func(w http.ResponseWriter, req *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			_, err := w.Write([]byte("OK"))
+			if err != nil {
+				respondWithError(w, http.StatusInternalServerError, "Error writing response")
+			}
+		})
 		// Users routes
 		r.Route("/users", func(r chi.Router) {
 			r.Get("/", func(w http.ResponseWriter, req *http.Request) {

@@ -46,7 +46,7 @@ func GetUserByID(db *database.Database, userID string) (*models.User, error) {
 	query := "SELECT id, username, password FROM users WHERE id = $1"
 	var user models.User
 
-	err := db.DB.QueryRow(query, userID).Scan(&user.ID, &user.Username)
+	err := db.DB.QueryRow(query, userID).Scan(&user.ID, &user.Username, &user.Password)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func GetUserByName(db *database.Database, username string) (*models.User, error)
 	query := "SELECT id, username, password FROM users WHERE username = $1"
 	var user models.User
 
-	err := db.DB.QueryRow(query, username).Scan(&user.ID, &user.Username)
+	err := db.DB.QueryRow(query, username).Scan(&user.ID, &user.Username, &user.Password)
 	if err == sql.ErrNoRows {
 		// User not found
 		return nil, nil
@@ -112,9 +112,9 @@ func Update(db *database.Database, userID string, userInput models.UserInput) (*
 		return nil, fmt.Errorf("user with ID %s not found", userID)
 	}
 
-	// Update the user's username
-	query := "UPDATE users SET username = $1 WHERE id = $2"
-	_, err = db.DB.Exec(query, userInput.Username, userID)
+	// Update the user's username and password
+	query := "UPDATE users SET username = $1, password = $2 WHERE id = $3"
+	_, err = db.DB.Exec(query, userInput.Username, userInput.Password, userID)
 	if err != nil {
 		return nil, fmt.Errorf("error executing query: %v", err)
 	}
@@ -147,7 +147,8 @@ func Delete(db *database.Database, userID string) error {
 	}
 
 	if rowsAffected == 0 {
-		return sql.ErrNoRows
+		// Handle the case when the user is not found
+		return fmt.Errorf("user with ID %s not found", userID)
 	}
 
 	return nil

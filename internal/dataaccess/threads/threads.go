@@ -64,8 +64,24 @@ func GetThreadByID(db *database.Database, threadID string) (*models.Thread, erro
 
 // Create inserts a new thread into the database.
 func Create(db *database.Database, input models.ThreadInput) (*models.Thread, error) {
-	query := "INSERT INTO threads (author_id, tag_id, title, content) VALUES ($1, $2, $3, $4)"
-	_, err := db.DB.Exec(query, input.AuthorID, input.TagID, input.Title, input.Content)
+	// Query to retrieve the author ID by name
+	authorQuery := "SELECT id FROM users WHERE username = $1"
+	var authorID string
+	err := db.DB.QueryRow(authorQuery, input.Author).Scan(&authorID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Query to retrieve the tag ID by name
+	tagQuery := "SELECT id FROM tags WHERE name = $1"
+	var tagID string
+	err = db.DB.QueryRow(tagQuery, input.Tag).Scan(&tagID)
+	if err != nil {
+		return nil, err
+	}
+
+	query := "INSERT INTO threads (id, author_id, tag_id, title, content) VALUES ($1, $2, $3, $4, $5)"
+	_, err = db.DB.Exec(query, input.ID, authorID, tagID, input.Title, input.Content)
 	if err != nil {
 		// Check if the error is due to duplicate key violation
 		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
@@ -74,17 +90,10 @@ func Create(db *database.Database, input models.ThreadInput) (*models.Thread, er
 		return nil, err
 	}
 
-	// Retrieve the last insert ID
-	var lastInsertID string
-	err = db.DB.QueryRow("SELECT currval(pg_get_serial_sequence('threads', 'id'))").Scan(&lastInsertID)
-	if err != nil {
-		return nil, err
-	}
-
 	thread := &models.Thread{
-		ID:      lastInsertID,
-		Author:  input.AuthorID,
-		Tag:     input.TagID,
+		ID:      input.ID,
+		Author:  input.Author,
+		Tag:     input.Tag,
 		Title:   input.Title,
 		Content: input.Content,
 	}
@@ -94,16 +103,31 @@ func Create(db *database.Database, input models.ThreadInput) (*models.Thread, er
 
 // Update updates an existing thread in the database.
 func Update(db *database.Database, threadID string, input models.ThreadInput) (*models.Thread, error) {
+	// Query to retrieve the author ID by name
+	authorQuery := "SELECT id FROM users WHERE username = $1"
+	var authorID string
+	err := db.DB.QueryRow(authorQuery, input.Author).Scan(&authorID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Query to retrieve the tag ID by name
+	tagQuery := "SELECT id FROM tags WHERE name = $1"
+	var tagID string
+	err = db.DB.QueryRow(tagQuery, input.Tag).Scan(&tagID)
+	if err != nil {
+		return nil, err
+	}
 	query := "UPDATE threads SET author_id = $1, tag_id = $2, title = $3, content = $4 WHERE id = $5"
-	_, err := db.DB.Exec(query, input.AuthorID, input.TagID, input.Title, input.Content, threadID)
+	_, err = db.DB.Exec(query, authorID, tagID, input.Title, input.Content, threadID)
 	if err != nil {
 		return nil, err
 	}
 
 	thread := &models.Thread{
 		ID:      threadID,
-		Author:  input.AuthorID,
-		Tag:     input.TagID,
+		Author:  authorID,
+		Tag:     tagID,
 		Title:   input.Title,
 		Content: input.Content,
 	}

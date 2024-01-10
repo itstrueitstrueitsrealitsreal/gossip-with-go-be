@@ -84,10 +84,10 @@ func Create(db *database.Database, userInput models.UserInput) (*models.User, er
 	}
 
 	// Insert the new user into the database
-	query := "INSERT INTO users (username) VALUES ($1) RETURNING id"
+	query := "INSERT INTO users (id, username, password) VALUES ($1, $2, $3) RETURNING id"
 	var userID string
 
-	err = db.DB.QueryRow(query, userInput.Username).Scan(&userID)
+	err = db.DB.QueryRow(query, userInput.ID, userInput.Username, userInput.Password).Scan(&userID)
 	if err != nil {
 		return nil, fmt.Errorf("error executing query: %v", err)
 	}

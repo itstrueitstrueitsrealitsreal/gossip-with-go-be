@@ -10,6 +10,7 @@ type User struct {
 
 // UserInput represents the input for creating or updating a user
 type UserInput struct {
+	ID       string `json:"id"`
 	Username string `json:"username"`
 	Password string `json:"password"`
 }

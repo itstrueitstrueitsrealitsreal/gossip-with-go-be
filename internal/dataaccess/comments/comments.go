@@ -162,19 +162,24 @@ func Delete(db *database.Database, commentID string) error {
 }
 
 // GetCommentsByThreadID retrieves all comments for a specific thread by thread ID from the database
-func GetCommentsByThreadID(db *database.Database, threadID string) ([]models.CommentJSON, error) {
-	query := "SELECT id, thread_id, author_id, content, timestamp FROM comments WHERE thread_id = $1"
+func GetCommentsByThreadID(db *database.Database, threadID string) ([]models.CommentResponse, error) {
+	query := `
+        SELECT comments.id, comments.thread_id, users.username, comments.content, comments.timestamp 
+        FROM comments 
+        INNER JOIN users ON comments.author_id = users.id 
+        WHERE comments.thread_id = $1
+    `
 	rows, err := db.DB.Query(query, threadID)
 	if err != nil {
 		return nil, fmt.Errorf("error executing query: %v", err)
 	}
 	defer rows.Close()
 
-	var comments []models.CommentJSON
+	var comments []models.CommentResponse
 	for rows.Next() {
-		var comment models.CommentJSON
+		var comment models.CommentResponse
 		var timestampStr string
-		err := rows.Scan(&comment.ID, &comment.ThreadID, &comment.AuthorID, &comment.Content, &timestampStr)
+		err := rows.Scan(&comment.ID, &comment.ThreadID, &comment.Author, &comment.Content, &timestampStr)
 		if err != nil {
 			return nil, fmt.Errorf("error scanning row: %v", err)
 		}

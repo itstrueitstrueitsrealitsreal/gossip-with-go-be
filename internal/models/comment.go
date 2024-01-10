@@ -26,3 +26,11 @@ type CommentJSON struct {
 	Content   string `json:"content"`
 	Timestamp string `json:"timestamp"`
 }
+
+type CommentResponse struct {
+	ID        string `json:"id"`
+	ThreadID  string `json:"thread_id"`
+	Author    string `json:"author"`
+	Content   string `json:"content"`
+	Timestamp string `json:"timestamp"`
+}

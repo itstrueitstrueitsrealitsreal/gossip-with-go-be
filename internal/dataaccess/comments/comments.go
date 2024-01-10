@@ -12,9 +12,13 @@ import (
 )
 
 // List retrieves a list of comments from the database.
-func List(db *database.Database) ([]models.CommentJSON, error) {
+func List(db *database.Database) ([]models.CommentResponse, error) {
 	// Query to select comments from the database
-	query := "SELECT id, thread_id, author_id, content, timestamp FROM comments"
+	query := `
+		SELECT c.id, c.thread_id, u.username AS author_name, c.content, c.timestamp
+		FROM comments c
+		INNER JOIN users u ON c.author_id = u.id
+	`
 
 	// Execute the query
 	rows, err := db.DB.Query(query)
@@ -28,14 +32,14 @@ func List(db *database.Database) ([]models.CommentJSON, error) {
 	}()
 
 	// Initialize a slice to store the retrieved comments
-	var comments []models.CommentJSON
+	var comments []models.CommentResponse
 
 	// Iterate through the rows and populate the comments slice
 	for rows.Next() {
-		var commentInput models.CommentJSON
+		var commentInput models.CommentResponse
 		var timestampStr string
 
-		err := rows.Scan(&commentInput.ID, &commentInput.ThreadID, &commentInput.AuthorID, &commentInput.Content, &timestampStr)
+		err := rows.Scan(&commentInput.ID, &commentInput.ThreadID, &commentInput.Author, &commentInput.Content, &timestampStr)
 		if err != nil {
 			return nil, fmt.Errorf("error scanning row: %v", err)
 		}

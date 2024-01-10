@@ -12,7 +12,7 @@ import (
 )
 
 // List retrieves a list of comments from the database.
-func List(db *database.Database) ([]models.CommentResponse, error) {
+func List(db *database.Database) ([]models.CommentInput, error) {
 	// Query to select comments from the database
 	query := `
 		SELECT c.id, c.thread_id, u.username AS author_name, c.content, c.timestamp
@@ -32,11 +32,11 @@ func List(db *database.Database) ([]models.CommentResponse, error) {
 	}()
 
 	// Initialize a slice to store the retrieved comments
-	var comments []models.CommentResponse
+	var comments []models.CommentInput
 
 	// Iterate through the rows and populate the comments slice
 	for rows.Next() {
-		var commentInput models.CommentResponse
+		var commentInput models.CommentInput
 		var timestampStr string
 
 		err := rows.Scan(&commentInput.ID, &commentInput.ThreadID, &commentInput.Author, &commentInput.Content, &timestampStr)
@@ -85,29 +85,42 @@ func GetCommentByID(db *database.Database, commentID string) (*models.CommentJSO
 
 // Create inserts a new comment into the database.
 func Create(db *database.Database, commentInput models.CommentInput, timestamp time.Time) (*models.Comment, error) {
-	// Insert the new comment into the database
-	query := "INSERT INTO comments (thread_id, author_id, content, timestamp) VALUES ($1, $2, $3, $4) RETURNING id"
-	row := db.DB.QueryRow(query, commentInput.ThreadID, commentInput.AuthorID, commentInput.Content, timestamp)
+	// Get the author ID for the given author name
+	authorID, err := getAuthorIDByName(db, commentInput.Author)
+	if err != nil {
+		return nil, fmt.Errorf("error getting author ID: %v", err)
+	}
 
-	// Get the ID of the newly inserted comment
-	var commentID string
-	err := row.Scan(&commentID)
+	// Insert the new comment into the database
+	query := "INSERT INTO comments (id, thread_id, author_id, content, timestamp) VALUES ($1, $2, $3, $4, $5)"
+	_, err = db.DB.Exec(query, commentInput.ID, commentInput.ThreadID, authorID, commentInput.Content, timestamp)
 	if err != nil {
 		// Check if the error is due to duplicate key value violation
 		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
 			return nil, fmt.Errorf("failed to create comment: comment with the same ID already exists")
 		}
-		return nil, fmt.Errorf("error getting last insert ID: %v", err)
+		return nil, fmt.Errorf("error executing query: %v", err)
 	}
 
 	// Return the newly created comment
 	return &models.Comment{
-		ID:        commentID,
+		ID:        commentInput.ID,
 		ThreadID:  commentInput.ThreadID,
-		AuthorID:  commentInput.AuthorID,
+		AuthorID:  authorID,
 		Content:   commentInput.Content,
 		Timestamp: timestamp,
 	}, nil
+}
+
+// getAuthorIDByName retrieves the author ID for the given author name from the database
+func getAuthorIDByName(db *database.Database, authorName string) (string, error) {
+	query := "SELECT id FROM users WHERE username = $1"
+	var authorID string
+	err := db.DB.QueryRow(query, authorName).Scan(&authorID)
+	if err != nil {
+		return "", fmt.Errorf("error getting author ID: %v", err)
+	}
+	return authorID, nil
 }
 
 // Update updates the comment with the specified ID in the database.
@@ -122,9 +135,15 @@ func Update(db *database.Database, commentID string, commentInput models.Comment
 		return nil, fmt.Errorf("comment with ID %s not found", commentID)
 	}
 
+	// Get the author ID for the given author name
+	authorID, err := getAuthorIDByName(db, commentInput.Author)
+	if err != nil {
+		return nil, fmt.Errorf("error getting author ID: %v", err)
+	}
+
 	// Update the comment's information
 	query := "UPDATE comments SET thread_id = $1, author_id = $2, content = $3, timestamp = $4 WHERE id = $5"
-	_, err = db.DB.Exec(query, commentInput.ThreadID, commentInput.AuthorID, commentInput.Content, timestamp, commentID)
+	_, err = db.DB.Exec(query, commentInput.ThreadID, authorID, commentInput.Content, timestamp, commentID)
 	if err != nil {
 		return nil, fmt.Errorf("error executing query: %v", err)
 	}
@@ -133,7 +152,7 @@ func Update(db *database.Database, commentID string, commentInput models.Comment
 	return &models.Comment{
 		ID:        existingComment.ID,
 		ThreadID:  commentInput.ThreadID,
-		AuthorID:  commentInput.AuthorID,
+		AuthorID:  authorID,
 		Content:   commentInput.Content,
 		Timestamp: timestamp,
 	}, nil
@@ -166,7 +185,7 @@ func Delete(db *database.Database, commentID string) error {
 }
 
 // GetCommentsByThreadID retrieves all comments for a specific thread by thread ID from the database
-func GetCommentsByThreadID(db *database.Database, threadID string) ([]models.CommentResponse, error) {
+func GetCommentsByThreadID(db *database.Database, threadID string) ([]models.CommentInput, error) {
 	query := `
         SELECT comments.id, comments.thread_id, users.username, comments.content, comments.timestamp 
         FROM comments 
@@ -179,9 +198,9 @@ func GetCommentsByThreadID(db *database.Database, threadID string) ([]models.Com
 	}
 	defer rows.Close()
 
-	var comments []models.CommentResponse
+	var comments []models.CommentInput
 	for rows.Next() {
-		var comment models.CommentResponse
+		var comment models.CommentInput
 		var timestampStr string
 		err := rows.Scan(&comment.ID, &comment.ThreadID, &comment.Author, &comment.Content, &timestampStr)
 		if err != nil {

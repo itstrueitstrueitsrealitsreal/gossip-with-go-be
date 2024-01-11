@@ -63,12 +63,17 @@ func List(db *database.Database) ([]models.CommentInput, error) {
 }
 
 // GetCommentByID retrieves a comment by ID from the database
-func GetCommentByID(db *database.Database, commentID string) (*models.CommentJSON, error) {
-	query := "SELECT id, thread_id, author_id, content, timestamp FROM comments WHERE id = $1"
-	var commentInput models.CommentJSON
+func GetCommentByID(db *database.Database, commentID string) (*models.CommentInput, error) {
+	query := `
+		SELECT c.id, c.thread_id, u.username AS author_name, c.content, c.timestamp
+		FROM comments c
+		INNER JOIN users u ON c.author_id = u.id
+		WHERE c.id = $1
+	`
+	var commentInput models.CommentInput
 	var timestampStr string
 
-	err := db.DB.QueryRow(query, commentID).Scan(&commentInput.ID, &commentInput.ThreadID, &commentInput.AuthorID, &commentInput.Content, &timestampStr)
+	err := db.DB.QueryRow(query, commentID).Scan(&commentInput.ID, &commentInput.ThreadID, &commentInput.Author, &commentInput.Content, &timestampStr)
 	if err != nil {
 		return nil, fmt.Errorf("error executing query: %v", err)
 	}
@@ -84,7 +89,7 @@ func GetCommentByID(db *database.Database, commentID string) (*models.CommentJSO
 }
 
 // Create inserts a new comment into the database.
-func Create(db *database.Database, commentInput models.CommentInput, timestamp time.Time) (*models.Comment, error) {
+func Create(db *database.Database, commentInput models.CommentInput, timestamp time.Time) (*models.CommentInput, error) {
 	// Get the author ID for the given author name
 	authorID, err := getAuthorIDByName(db, commentInput.Author)
 	if err != nil {
@@ -103,13 +108,7 @@ func Create(db *database.Database, commentInput models.CommentInput, timestamp t
 	}
 
 	// Return the newly created comment
-	return &models.Comment{
-		ID:        commentInput.ID,
-		ThreadID:  commentInput.ThreadID,
-		AuthorID:  authorID,
-		Content:   commentInput.Content,
-		Timestamp: timestamp,
-	}, nil
+	return &commentInput, nil
 }
 
 // getAuthorIDByName retrieves the author ID for the given author name from the database
@@ -124,7 +123,7 @@ func getAuthorIDByName(db *database.Database, authorName string) (string, error)
 }
 
 // Update updates the comment with the specified ID in the database.
-func Update(db *database.Database, commentID string, commentInput models.CommentInput, timestamp time.Time) (*models.Comment, error) {
+func Update(db *database.Database, commentID string, commentInput models.CommentInput, timestamp time.Time) (*models.CommentInput, error) {
 	// Check if the comment with the given ID exists
 	existingComment, err := GetCommentByID(db, commentID)
 	if err != nil {
@@ -149,13 +148,7 @@ func Update(db *database.Database, commentID string, commentInput models.Comment
 	}
 
 	// Return the updated comment
-	return &models.Comment{
-		ID:        existingComment.ID,
-		ThreadID:  commentInput.ThreadID,
-		AuthorID:  authorID,
-		Content:   commentInput.Content,
-		Timestamp: timestamp,
-	}, nil
+	return &commentInput, nil
 }
 
 // Delete removes a comment from the database by ID.

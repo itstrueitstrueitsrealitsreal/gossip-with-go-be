@@ -27,6 +27,9 @@ func GetRoutes() func(r chi.Router) {
 				respondWithError(w, http.StatusInternalServerError, "Error writing response")
 			}
 		})
+		r.Get("/*", func(w http.ResponseWriter, req *http.Request) {
+			http.Redirect(w, req, "/", http.StatusMovedPermanently)
+		})
 		// Users routes
 		r.Route("/users", func(r chi.Router) {
 			r.Get("/", func(w http.ResponseWriter, req *http.Request) {

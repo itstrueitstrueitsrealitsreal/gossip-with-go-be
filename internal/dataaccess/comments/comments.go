@@ -18,6 +18,7 @@ func List(db *database.Database) ([]models.CommentInput, error) {
 		SELECT c.id, c.thread_id, u.username AS author_name, c.content, c.timestamp
 		FROM comments c
 		INNER JOIN users u ON c.author_id = u.id
+		ORDER BY c.timestamp ASC
 	`
 
 	// Execute the query
@@ -184,6 +185,7 @@ func GetCommentsByThreadID(db *database.Database, threadID string) ([]models.Com
         FROM comments 
         INNER JOIN users ON comments.author_id = users.id 
         WHERE comments.thread_id = $1
+		ORDER BY comments.timestamp ASC
     `
 	rows, err := db.DB.Query(query, threadID)
 	if err != nil {
